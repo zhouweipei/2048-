@@ -1,6 +1,6 @@
 import Felgo 3.0
 import QtQuick 2.0
-import naturEarth 1.0
+import MY2048 1.0
 GameWindow {
     id: gameWindow
     activeScene: root
@@ -27,6 +27,35 @@ GameWindow {
                     panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
                 }
            }
+            information.eScore=numProvider.score;
+            information.eStep=numProvider.step;
+            information.eBestScore=numProvider.bestScore;
+            information.eTotalStep=numProvider.totalStep;
+            if(numProvider.step>0)
+                tip.eEnBack=true;
+        }
+        Keys.onPressed: {
+            switch(event.key){
+            case Qt.Key_Up:
+                numProvider.move(MY2048.Move_Up);
+                root.eShow();
+                break;
+            case Qt.Key_Down:
+                numProvider.move(MY2048.Move_Down);
+                root.eShow();
+                break;
+            case Qt.Key_Left:
+                numProvider.move(MY2048.Move_Left);
+                root.eShow();
+                break;
+            case Qt.Key_Right:
+                numProvider.move(MY2048.Move_Right);
+                root.eShow();
+                break;
+            default:
+                break;
+            }
+
         }
         width: 360
         height: 560
@@ -46,11 +75,23 @@ GameWindow {
                  y:460
                 id:tip
                 onStart: {
-                    numProvider.start()
+                    numProvider.start();
                     root.eShow();
                     root.focus=true;
+                    tip.eEnBack=false;
                 }
-
+                onBack: {
+                    numProvider.backed();
+                    root.eShow();
+                    if(!numProvider.step)
+                        tip.eEnBack=false;
+                }
+                onExit: {
+                    Mydialog
+                    {
+                        M_id:dialog
+                    }
+                }
              }
         }
     }

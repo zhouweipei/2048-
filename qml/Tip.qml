@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.0
 Item {
+    property alias eEnBack: back.enabled
     signal start()
     signal back()
     signal exit()
@@ -12,12 +13,15 @@ Item {
         onClicked: parent.start();
     }
     Button{
+        id:back
         width: 120;height: 100
         x:120
         text:qsTr("Back")
+        enabled: false
         onClicked: parent.back();
     }
     Button{
+
         width: 120;height: 100
         x:240
         text:qsTr("Exit")

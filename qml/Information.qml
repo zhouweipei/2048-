@@ -1,6 +1,10 @@
 import QtQuick 2.0
 
 Rectangle {
+    property alias eScore: score.text
+    property alias eBestScore: bestScore.text
+    property alias eStep: step.text
+    property alias eTotalStep: totalStep.text
     width: 360
     height: 110
     color: "lightyellow"

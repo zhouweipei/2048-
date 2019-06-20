@@ -10,6 +10,9 @@ class MY2048 :public QObject
     Q_OBJECT
     Q_ENUMS(Move_Direcation)
     Q_PROPERTY(int score READ score)
+    Q_PROPERTY(int bestScore READ bestScore)
+    Q_PROPERTY(int step READ step)
+    Q_PROPERTY(int totalStep READ totalStep)
 public:
     MY2048(QObject *parent = nullptr);
     ~MY2048();
@@ -29,7 +32,7 @@ public:
      int step() const;
      int totalStep() const;
 signals:
-   void backd();
+   void backed();
    //void exit();
 public slots:
     int show(const int &index);
@@ -42,17 +45,16 @@ private:
     void freshed(bool freshed);
 
     int m_score;
-    int m_bestScoore;
+    int m_bestScore;
     int m_step;
     int m_totalStep;
-
+    int m_lastScore;
     typedef std::vector<int>Panel;
     typedef std::vector<Panel>State;
 
     Panel m_number;
     Panel m_index;
     State m_state;
-
     int m_preIndex;
     int m_nextIndex;
 

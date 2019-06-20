@@ -1,11 +1,13 @@
 #include "MY2048.h"
 #include <ctime>
 #include <QDebug>
-
+#include "MY2048.h"
 MY2048::MY2048(QObject *parent)
     :QObject(parent)
 {
-    m_score=0;
+    m_bestScore=0;
+    connect(this,SIGNAL(backed()),this,SLOT(goBack()));
+
 }
 MY2048::~MY2048()
 {
@@ -50,6 +52,24 @@ int MY2048::show(const int &index)
 {
     return m_number[index];
 }
+void MY2048::move(Move_Direcation direcation)
+{
+    added(direcation);
+    moved(direcation);
+    freshed(m_addFlag||m_moveFlag);
+    if(m_bestScore<m_score)
+        m_bestScore=m_score;
+}
+void MY2048::goBack()
+{
+    if(m_step>0){
+        m_number=m_state[m_step-1];
+        m_state.pop_back();
+        m_step-=1;
+
+    }
+}
+
 void MY2048::initMum()
 {
     m_number.clear();
@@ -60,7 +80,15 @@ void MY2048::initMum()
         secondNum=rand()%16;
     }
     m_number[firstNum]=2;
-    m_number[secondNum]=1024;
+    m_number[secondNum]=2;
+    m_step=0;
+    m_score=0;
+    m_bestScore=0;
+    m_totalStep=0;
+
+    m_state.clear();
+    m_state.push_back(m_number);
+
 }
 int MY2048::score() const
 {
@@ -68,7 +96,7 @@ int MY2048::score() const
 }
 int MY2048::bestScore() const
 {
-    return m_bestScoore;
+    return m_bestScore;
 }
 int MY2048::step() const
 {
@@ -83,6 +111,258 @@ void MY2048::added(Move_Direcation direcation)
     if(direcation==Move_Down)
     {
         m_addFlag=false;
+        for (int i=0;i<COLUMNS;i++) {
+            m_preIndex=i;
+            m_nextIndex=m_preIndex+4;
+            while(m_nextIndex<=i+12){
+                if(m_number[m_preIndex]==0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+4;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex+=4;
+                    continue;
+                }
+                if(m_number[m_preIndex]!=m_number[m_nextIndex])
+                {
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+4;
+                }else {
+                    m_number[m_preIndex]=0;
+                    m_number[m_nextIndex]+=m_number[m_nextIndex];
+                    m_score+=m_number[m_nextIndex];
+                    m_preIndex=m_nextIndex+4;
+                    m_nextIndex=m_preIndex+4;
+                    m_addFlag=true;
+                }
+            }
+        }
+
+    }
+    if(direcation==Move_Up)
+    {
+        m_addFlag=false;
+        for (int i=0;i<COLUMNS;i++) {
+            m_preIndex=i+12;
+            m_nextIndex=m_preIndex-4;
+            while(m_nextIndex>=i){
+                if(m_number[m_preIndex]==0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-4;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex-=4;
+                    continue;
+                }
+                if(m_number[m_preIndex]!=m_number[m_nextIndex])
+                {
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-4;
+                }else {
+                    m_number[m_preIndex]=0;
+                    m_number[m_nextIndex]+=m_number[m_nextIndex];
+                    m_score+=m_number[m_nextIndex];
+                    m_preIndex=m_nextIndex-4;
+                    m_nextIndex=m_preIndex-4;
+                    m_addFlag=true;
+                }
+            }
+        }
+
+    }
+    if(direcation==Move_Right)
+    {
+        m_addFlag=false;
+        for (int i=0;i<ROWS;i++) {
+            m_preIndex=i*4;
+            m_nextIndex=m_preIndex+1;
+            while(m_nextIndex<=i*4+3){
+                if(m_number[m_preIndex]==0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+1;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex+=1;
+                    continue;
+                }
+                if(m_number[m_preIndex]!=m_number[m_nextIndex])
+                {
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+1;
+                }else {
+                    m_number[m_preIndex]=0;
+                    m_number[m_nextIndex]+=m_number[m_nextIndex];
+                    m_score+=m_number[m_nextIndex];
+                    m_preIndex=m_nextIndex+1;
+                    m_nextIndex=m_preIndex+1;
+                    m_addFlag=true;
+                }
+            }
+        }
+    }
+    if(direcation==Move_Left)
+    {
+        m_addFlag=false;
+        for (int i=0;i<ROWS;i++) {
+            m_preIndex=i*4+3;
+            m_nextIndex=m_preIndex-1;
+            while(m_nextIndex>=i*4){
+                if(m_number[m_preIndex]==0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-1;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex-=1;
+                    continue;
+                }
+                if(m_number[m_preIndex]!=m_number[m_nextIndex])
+                {
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-1;
+                }else {
+                    m_number[m_preIndex]=0;
+                    m_number[m_nextIndex]+=m_number[m_nextIndex];
+                    m_score+=m_number[m_nextIndex];
+                    m_preIndex=m_nextIndex-1;
+                    m_nextIndex=m_preIndex-1;
+                    m_addFlag=true;
+                }
+            }
+        }
+    }
+
+}
+void MY2048::moved(Move_Direcation direcation)
+{
+    if(direcation==Move_Down)
+    {
+        m_moveFlag=false;
+        for (int i=0;i<COLUMNS;i++) {
+            m_preIndex=i+12;
+            m_nextIndex=m_preIndex-4;
+            while(m_nextIndex>=i){
+                if(m_number[m_preIndex]!=0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-4;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex-=4;
+                    continue;
+                }else {
+                    m_number[m_preIndex]=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_preIndex=m_preIndex-4;
+                    m_nextIndex=m_nextIndex-4;
+                    m_moveFlag=true;
+                }
+            }
+        }
+    }
+    if(direcation==Move_Up)
+    {
+        m_moveFlag=false;
+        for (int i=0;i<COLUMNS;i++) {
+            m_preIndex=i;
+            m_nextIndex=m_preIndex+4;
+            while(m_nextIndex<=i+12){
+                if(m_number[m_preIndex]!=0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+4;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex+=4;
+                    continue;
+                }else {
+                    m_number[m_preIndex]=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_preIndex=m_preIndex+4;
+                    m_nextIndex=m_nextIndex+4;
+                    m_moveFlag=true;
+                }
+            }
+        }
+    }
+    if(direcation==Move_Right)
+    {
+        m_moveFlag=false;
+        for (int i=0;i<ROWS;i++) {
+            m_preIndex=i*4+3;
+            m_nextIndex=m_preIndex-1;
+            while(m_nextIndex>=i*4){
+                if(m_number[m_preIndex]!=0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex-1;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex-=1;
+                    continue;
+                }else {
+                    m_number[m_preIndex]=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_preIndex=m_preIndex-1;
+                    m_nextIndex=m_nextIndex-1;
+                    m_moveFlag=true;
+                }
+            }
+        }
+    }
+    if(direcation==Move_Left)
+    {
+        m_moveFlag=false;
+        for (int i=0;i<ROWS;i++) {
+            m_preIndex=i*4;
+            m_nextIndex=m_preIndex+1;
+            while(m_nextIndex<=i*4+3){
+                if(m_number[m_preIndex]!=0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+1;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex+=1;
+                    continue;
+                }else {
+                    m_number[m_preIndex]=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_preIndex=m_preIndex+1;
+                    m_nextIndex=m_nextIndex+1;
+                    m_moveFlag=true;
+                }
+            }
+        }
+    }
+
+}
+void MY2048::freshed(bool freshed)
+{
+    if(freshed){
+        m_step+=1;
+        m_totalStep=m_step;
+
+        m_index.clear();
+        for (size_t i=0;i<m_number.size();i++) {
+            if(!m_number[i])
+                m_index.push_back(i);
+        }
+
+        int randIndex=rand()%m_index.size();
+        m_number[m_index[randIndex]]=2;
+        m_state.push_back(m_number);
 
     }
 }
