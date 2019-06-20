@@ -1,11 +1,13 @@
 #include "MY2048.h"
 #include <ctime>
 #include <QDebug>
-#include "MY2048.h"
+#include <QFile>
+#include <QJsonDocument>
+
 MY2048::MY2048(QObject *parent)
     :QObject(parent)
 {
-    m_bestScore=0;
+    load();
     connect(this,SIGNAL(backed()),this,SLOT(goBack()));
 
 }
@@ -22,7 +24,7 @@ QColor MY2048::color(const int &index)
     int num=m_number[index];
     QColor color;
     switch (num) {
-        case 0: color=QColor(255,255,255);break;
+        case 0: color=QColor(255,0,255);break;
         case 2: color=QColor(250,220,180);break;
         case 4: color=QColor(230,130,230);break;
         case 8: color=QColor(0,255,130);break;
@@ -90,22 +92,93 @@ void MY2048::initMum()
     m_state.push_back(m_number);
 
 }
+
 int MY2048::score() const
 {
     return m_score;
 }
+void MY2048::setScore(const int score)
+{
+    m_step=score;
+}
+
 int MY2048::bestScore() const
 {
     return m_bestScore;
 }
+void MY2048::setBestScore(const int bestScore)
+{
+    m_bestScore=bestScore;
+}
+
 int MY2048::step() const
 {
     return m_step;
 }
+void MY2048::setStep(const int step)
+{
+    m_step=step;
+}
+
 int MY2048::totalStep() const
 {
     return m_totalStep;
 }
+void MY2048::setTotalStep(const int totalStep)
+{
+    m_totalStep=totalStep;
+}
+
+void MY2048::write(QJsonObject &json)
+{
+    json["score"] =m_score;
+    json["bestScore"]=m_bestScore;
+    json["step"]=m_step;
+    json["totalStep"]=m_totalStep;
+}
+bool MY2048::save()
+{
+    QFile saveFile(QStringLiteral("save.json"));
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        qWarning("Couldn't open save file");
+        return  false;
+    }
+    QJsonObject gameObject;
+    write(gameObject);
+    QJsonDocument saveDoc(gameObject);
+    saveFile.write(saveDoc.toJson());
+    return true;
+}
+
+void MY2048::read(QJsonObject &json)
+{
+    if(json.contains("score") && json["score"].isDouble())
+        m_score=json["score"].toInt();
+    if(json.contains("bestScore") && json["bestScore"].isDouble())
+        m_bestScore=json["bestScore"].toInt();
+    if(json.contains("step") && json["step"].isDouble())
+        m_step=json["step"].toInt();
+    if(json.contains("totalStep") && json["totalStep"].isDouble())
+        m_totalStep=json["totalStep"].toInt();
+}
+
+bool MY2048::load()
+{
+    QFile loadFile(QStringLiteral("save.json"));
+    if(!loadFile.open(QIODevice::ReadOnly))
+    {
+        qWarning("Can't open save file.");
+        return false;
+    }
+
+    QByteArray saveDate=loadFile.readAll();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(saveDate));
+    QJsonObject json(loadDoc.object());
+    read(json);
+    return true;
+}
+
 void MY2048::added(Move_Direcation direcation)
 {
     if(direcation==Move_Down)
@@ -352,7 +425,7 @@ void MY2048::freshed(bool freshed)
 {
     if(freshed){
         m_step+=1;
-        m_totalStep=m_step;
+        m_totalStep+=1;
 
         m_index.clear();
         for (size_t i=0;i<m_number.size();i++) {

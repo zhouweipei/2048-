@@ -18,6 +18,7 @@ GameWindow {
         }
         function eShow(){
             eClear();
+            if(numProvider.load()===false){
             for(eI=0;eI<16;eI++)
             {
                 if(numProvider.show(eI)){
@@ -26,7 +27,8 @@ GameWindow {
 
                     panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
                 }
-           }
+           }}
+
             information.eScore=numProvider.score;
             information.eStep=numProvider.step;
             information.eBestScore=numProvider.bestScore;
@@ -59,12 +61,15 @@ GameWindow {
         }
         width: 360
         height: 560
+
         MY2048{id:numProvider}
+
         Rectangle{
             id:container
             anchors.fill: parent
             Information{
             id:information
+
             }
              Panel{
             id:panel
@@ -75,7 +80,9 @@ GameWindow {
                  y:460
                 id:tip
                 onStart: {
-                    numProvider.start();
+                    if(numProvider.load()===false)
+                        numProvider.start();
+
                     root.eShow();
                     root.focus=true;
                     tip.eEnBack=false;
@@ -87,10 +94,7 @@ GameWindow {
                         tip.eEnBack=false;
                 }
                 onExit: {
-                    Mydialog
-                    {
-                        M_id:dialog
-                    }
+                     numProvider.save();
                 }
              }
         }

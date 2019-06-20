@@ -64,8 +64,7 @@ DISTFILES += \
     qml/Information.qml \
     qml/Panel.qml \
     qml/MyItem.qml \
-    qml/Tip.qml \
-    qml/Mydialog.qml
+    qml/Tip.qml
 
 HEADERS += \
     MY2048.h

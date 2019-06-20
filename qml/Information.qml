@@ -23,6 +23,7 @@ Rectangle {
             font.bold:true
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignLeft
+
         }
         Text{
             width: 90;height: 50
