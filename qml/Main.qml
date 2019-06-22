@@ -1,5 +1,6 @@
 import Felgo 3.0
 import QtQuick 2.0
+import QtQuick.Dialogs 1.2 as QQD
 import MY2048 1.0
 GameWindow {
     id: gameWindow
@@ -18,16 +19,17 @@ GameWindow {
         }
         function eShow(){
             eClear();
-            if(numProvider.load()===false){
-            for(eI=0;eI<16;eI++)
-            {
-                if(numProvider.show(eI)){
-                    panel.eNums.itemAt(eI).eNum=numProvider.show(eI);
-                    panel.eNums.itemAt(eI).color=numProvider.color(eI);
 
-                    panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
-                }
-           }}
+
+                 for(eI=0;eI<16;eI++)
+                 {
+                    if(numProvider.show(eI)!==0){
+                        panel.eNums.itemAt(eI).eNum=numProvider.show(eI);
+                        panel.eNums.itemAt(eI).color=numProvider.color(eI);
+                        panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
+                    }
+                  }
+
 
             information.eScore=numProvider.score;
             information.eStep=numProvider.step;
@@ -35,7 +37,27 @@ GameWindow {
             information.eTotalStep=numProvider.totalStep;
             if(numProvider.step>0)
                 tip.eEnBack=true;
-        }
+
+//            if(numProvider.load()===true){
+
+//                 for(eI=0;eI<16;eI++)
+//                 {
+//                    if(numProvider.show(eI)!==0){
+//                        panel.eNums.itemAt(eI).eNum=numProvider.show(eI);
+//                        panel.eNums.itemAt(eI).color=numProvider.color(eI);
+//                        panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
+//                    }
+//                  }
+
+
+//            information.eScore=numProvider.score;
+//            information.eStep=numProvider.step;
+//            information.eBestScore=numProvider.bestScore;
+//            information.eTotalStep=numProvider.totalStep;
+//            if(numProvider.step>0)
+//                tip.eEnBack=true;
+//        }
+}
         Keys.onPressed: {
             switch(event.key){
             case Qt.Key_Up:
@@ -79,10 +101,8 @@ GameWindow {
              Tip{
                  y:460
                 id:tip
-                onStart: {
-                    if(numProvider.load()===false)
-                        numProvider.start();
-
+                onStart: { 
+                    numProvider.start();
                     root.eShow();
                     root.focus=true;
                     tip.eEnBack=false;
@@ -96,7 +116,15 @@ GameWindow {
                 onExit: {
                      numProvider.save();
                 }
+                onLoad: {
+                    numProvider.load();
+                    root.eShow();
+                }
              }
         }
     }
+
+
+
+
 }

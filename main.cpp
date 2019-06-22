@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <iostream>
 #include <FelgoApplication>
 #include "MY2048.h"
 #include <QQmlApplicationEngine>
@@ -33,6 +34,5 @@ int main(int argc, char *argv[])
     // felgo.setMainQmlFileName(QStringLiteral("qrc:/qml/Main.qml"));
 
     engine.load(QUrl(felgo.mainQmlFileName()));
-
     return app.exec();
 }

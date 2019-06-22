@@ -3,11 +3,12 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
-
+#include <QJsonArray>
+#include <iostream>
 MY2048::MY2048(QObject *parent)
     :QObject(parent)
 {
-    load();
+
     connect(this,SIGNAL(backed()),this,SLOT(goBack()));
 
 }
@@ -28,7 +29,7 @@ QColor MY2048::color(const int &index)
         case 2: color=QColor(250,220,180);break;
         case 4: color=QColor(230,130,230);break;
         case 8: color=QColor(0,255,130);break;
-        case 16: color=QColor(100,100,200);break;
+        case 16: color=QColor(252,150,200);break;
         case 32: color=QColor(255,170,0);break;
         case 64: color=QColor(170,255,50);break;
         case 128: color=QColor(255,100,70);break;
@@ -47,7 +48,7 @@ QColor MY2048::numColor(const int &index)
     if(m_number[index]>8192)
         return QColor(0,0,0);
     else {
-        return  QColor(255,255,255);
+        return  QColor(100,20,255);
     }
 }
 int MY2048::show(const int &index)
@@ -56,9 +57,17 @@ int MY2048::show(const int &index)
 }
 void MY2048::move(Move_Direcation direcation)
 {
-    added(direcation);
     moved(direcation);
+    added(direcation);
+
+//    for (int i=0;i<16;i++) {
+//        std::cout<<i <<m_number[i]<<std::endl;
+//    }
+
+   // std::cout<<m_index.size()<<std::endl;
     freshed(m_addFlag||m_moveFlag);
+    if(m_addFlag==false&&m_moveFlag==false&&nextGame()==true)
+        Mydialog();
     if(m_bestScore<m_score)
         m_bestScore=m_score;
 }
@@ -90,54 +99,53 @@ void MY2048::initMum()
 
     m_state.clear();
     m_state.push_back(m_number);
+   // std::cout<<"start"+m_index.size();
 
 }
-
+void MY2048::Mydialog()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Please Click The New Game");
+    msgBox.exec();
+}
 int MY2048::score() const
 {
     return m_score;
 }
-void MY2048::setScore(const int score)
-{
-    m_step=score;
-}
-
 int MY2048::bestScore() const
 {
     return m_bestScore;
-}
-void MY2048::setBestScore(const int bestScore)
-{
-    m_bestScore=bestScore;
 }
 
 int MY2048::step() const
 {
     return m_step;
 }
-void MY2048::setStep(const int step)
-{
-    m_step=step;
-}
 
 int MY2048::totalStep() const
 {
     return m_totalStep;
 }
-void MY2048::setTotalStep(const int totalStep)
-{
-    m_totalStep=totalStep;
-}
-
 void MY2048::write(QJsonObject &json)
 {
     json["score"] =m_score;
     json["bestScore"]=m_bestScore;
     json["step"]=m_step;
     json["totalStep"]=m_totalStep;
+    QJsonArray numIndex;
+    for (auto i=0;i<m_number.size();i++)
+    {
+        json["num"] =m_number[i];
+        numIndex.append(json["num"]);
+    }
+    json["num"]=numIndex;
+
+ //   std::cout<<m_index.size();
+
 }
 bool MY2048::save()
 {
+
     QFile saveFile(QStringLiteral("save.json"));
     if(!saveFile.open(QIODevice::WriteOnly))
     {
@@ -150,9 +158,19 @@ bool MY2048::save()
     saveFile.write(saveDoc.toJson());
     return true;
 }
+bool MY2048::nextGame()
+{
 
+    for (int i=0;i<16;i++) {
+        if(m_number[i]==0)
+            return false;
+    }
+    return true;
+
+}
 void MY2048::read(QJsonObject &json)
 {
+
     if(json.contains("score") && json["score"].isDouble())
         m_score=json["score"].toInt();
     if(json.contains("bestScore") && json["bestScore"].isDouble())
@@ -161,6 +179,15 @@ void MY2048::read(QJsonObject &json)
         m_step=json["step"].toInt();
     if(json.contains("totalStep") && json["totalStep"].isDouble())
         m_totalStep=json["totalStep"].toInt();
+    if(json.contains("num")&& json["num"].isArray())
+    {
+        QJsonArray numIndex=json["num"].toArray();
+        m_number.clear();
+        m_number.reserve(numIndex.size());
+        for (int i=0;i<numIndex.size();++i) {
+          m_number[i]=numIndex[i].toInt();
+        }
+    }
 }
 
 bool MY2048::load()
@@ -168,7 +195,7 @@ bool MY2048::load()
     QFile loadFile(QStringLiteral("save.json"));
     if(!loadFile.open(QIODevice::ReadOnly))
     {
-        qWarning("Can't open save file.");
+        qWarning("aa");
         return false;
     }
 
@@ -426,16 +453,22 @@ void MY2048::freshed(bool freshed)
     if(freshed){
         m_step+=1;
         m_totalStep+=1;
-
+//        for (int i=0;i<16;i++) {
+//            std::cout<<i <<m_number[i]<<std::endl;
+//        }
         m_index.clear();
-        for (size_t i=0;i<m_number.size();i++) {
-            if(!m_number[i])
+//        int nsize=m_number.size();
+        for (int i=0;i<16;i++) {
+            if(m_number[i]==0){
                 m_index.push_back(i);
+            }
         }
-
         int randIndex=rand()%m_index.size();
         m_number[m_index[randIndex]]=2;
+//        std::cout<<m_index[randIndex]<<std::endl;
+//        std::cout<<m_number[m_index[randIndex]]<<std::endl;
         m_state.push_back(m_number);
 
     }
+
 }

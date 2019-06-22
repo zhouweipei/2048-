@@ -4,16 +4,17 @@
 #include <QColor>
 #include <QJsonObject>
 #include <QString>
+#include <QMessageBox>
 #define ROWS 4
 #define COLUMNS 4
 class MY2048 :public QObject
 {
     Q_OBJECT
     Q_ENUMS(Move_Direcation)
-    Q_PROPERTY(int score READ score WRITE setScore)
-    Q_PROPERTY(int bestScore READ bestScore WRITE setBestScore)
-    Q_PROPERTY(int step READ step WRITE setStep)
-    Q_PROPERTY(int totalStep READ totalStep WRITE setTotalStep)
+    Q_PROPERTY(int score READ score )
+    Q_PROPERTY(int bestScore READ bestScore )
+    Q_PROPERTY(int step READ step )
+    Q_PROPERTY(int totalStep READ totalStep )
 public:
     MY2048(QObject *parent = nullptr);
     ~MY2048();
@@ -32,19 +33,20 @@ public:
     Q_INVOKABLE bool load();
 
      int score() const;
-     void setScore(const int score);
+
 
      int bestScore() const;
-     void setBestScore(const int bestScore);
+
 
      int step() const;
-     void setStep(const int step);
+
 
      int totalStep() const;
-     void setTotalStep(const int totalStep);
+
 
      void read(QJsonObject &json);
-
+     void Mydialog();
+     bool nextGame();
      void write(QJsonObject &json);
 signals:
    void backed();

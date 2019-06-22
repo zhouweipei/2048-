@@ -5,28 +5,36 @@ Item {
     signal start()
     signal back()
     signal exit()
+    signal load()
     width: 360
     height: 180
     Button{
-        width: 120;height: 100
-        text:qsTr("Start")
+        width: 90;height: 100
+        text:qsTr("新游戏")
         onClicked: parent.start();
     }
     Button{
         id:back
-        width: 120;height: 100
-        x:120
-        text:qsTr("Back")
+        width: 90;height: 100
+        x:90
+        text:qsTr("撤销")
         enabled: false
         onClicked: parent.back();
     }
     Button{
 
-        width: 120;height: 100
-        x:240
-        text:qsTr("Exit")
+        width: 90;height: 100
+        x:180
+        text:qsTr("存档")
         onClicked: parent.exit();
     }
+    Button{
+        x:270
+        width: 90;height: 100
+        text:qsTr("读档")
+        onClicked: parent.load();
+    }
+
 
 
 }
