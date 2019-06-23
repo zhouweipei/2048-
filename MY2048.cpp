@@ -2,9 +2,11 @@
 #include <ctime>
 #include <QDebug>
 #include <QFile>
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <iostream>
+#include <QTimer>
 MY2048::MY2048(QObject *parent)
     :QObject(parent)
 {
@@ -20,7 +22,7 @@ void MY2048::start()
 {
     initMum();
 }
-QColor MY2048::color(const int &index)
+QColor MY2048::color(const int &index)//通过number来判断方块颜色
 {
     int num=m_number[index];
     QColor color;
@@ -43,7 +45,7 @@ QColor MY2048::color(const int &index)
     }
     return color;
 }
-QColor MY2048::numColor(const int &index)
+QColor MY2048::numColor(const int &index)//数字颜色
 {
     if(m_number[index]>8192)
         return QColor(0,0,0);
@@ -51,15 +53,21 @@ QColor MY2048::numColor(const int &index)
         return  QColor(100,20,255);
     }
 }
-int MY2048::show(const int &index)
+int MY2048::show(const int &index)//返回数字
 {
     return m_number[index];
 }
-void MY2048::move(Move_Direcation direcation)
+void MY2048::move(Move_Direcation direcation)//控制方块的移动合并和刷新
 {
-    moved(direcation);
+    //if(!m_step){}
+
+
+    m_scoreState.push_back(m_score);
     added(direcation);
 
+    moved(direcation);
+   // m_lastScore=m_score;
+    //std::cout<<m_lastScore<<std::endl;
 //    for (int i=0;i<16;i++) {
 //        std::cout<<i <<m_number[i]<<std::endl;
 //    }
@@ -70,18 +78,22 @@ void MY2048::move(Move_Direcation direcation)
         Mydialog();
     if(m_bestScore<m_score)
         m_bestScore=m_score;
+
 }
-void MY2048::goBack()
+void MY2048::goBack()//撤销功能
 {
     if(m_step>0){
         m_number=m_state[m_step-1];
         m_state.pop_back();
+        m_score=m_scoreState[m_step-1];
+        m_scoreState.pop_back();
         m_step-=1;
+     //   m_score=m_lastScore;
 
     }
 }
 
-void MY2048::initMum()
+void MY2048::initMum()//初始化游戏
 {
     m_number.clear();
     m_number=Panel(16,0);
@@ -96,13 +108,15 @@ void MY2048::initMum()
     m_score=0;
     m_bestScore=0;
     m_totalStep=0;
+    //m_lastScore=0;
 
     m_state.clear();
     m_state.push_back(m_number);
    // std::cout<<"start"+m_index.size();
 
 }
-void MY2048::Mydialog()
+
+void MY2048::Mydialog()//提示游戏结束
 {
     QMessageBox msgBox;
     msgBox.setText("Please Click The New Game");
@@ -116,24 +130,22 @@ int MY2048::bestScore() const
 {
     return m_bestScore;
 }
-
 int MY2048::step() const
 {
     return m_step;
 }
-
 int MY2048::totalStep() const
 {
     return m_totalStep;
 }
-void MY2048::write(QJsonObject &json)
+void MY2048::write(QJsonObject &json)//往JSON文档里写数据
 {
     json["score"] =m_score;
     json["bestScore"]=m_bestScore;
     json["step"]=m_step;
     json["totalStep"]=m_totalStep;
     QJsonArray numIndex;
-    for (auto i=0;i<m_number.size();i++)
+    for ( int i=0;i<m_number.size();i++)
     {
         json["num"] =m_number[i];
         numIndex.append(json["num"]);
@@ -143,7 +155,7 @@ void MY2048::write(QJsonObject &json)
  //   std::cout<<m_index.size();
 
 }
-bool MY2048::save()
+bool MY2048::save()//保存游戏
 {
 
     QFile saveFile(QStringLiteral("save.json"));
@@ -158,7 +170,7 @@ bool MY2048::save()
     saveFile.write(saveDoc.toJson());
     return true;
 }
-bool MY2048::nextGame()
+bool MY2048::nextGame()//判断游戏是否结束
 {
 
     for (int i=0;i<16;i++) {
@@ -168,7 +180,7 @@ bool MY2048::nextGame()
     return true;
 
 }
-void MY2048::read(QJsonObject &json)
+void MY2048::read(QJsonObject &json)//将json文档里的数据读出来
 {
 
     if(json.contains("score") && json["score"].isDouble())
@@ -190,7 +202,7 @@ void MY2048::read(QJsonObject &json)
     }
 }
 
-bool MY2048::load()
+bool MY2048::load()//读取本地保存的游戏数据
 {
     QFile loadFile(QStringLiteral("save.json"));
     if(!loadFile.open(QIODevice::ReadOnly))
@@ -206,42 +218,14 @@ bool MY2048::load()
     return true;
 }
 
-void MY2048::added(Move_Direcation direcation)
+void MY2048::exit()//终止游戏
+{
+    QApplication* app;
+    app->exit(0);
+}
+void MY2048::added(Move_Direcation direcation)//控制方块的相加
 {
     if(direcation==Move_Down)
-    {
-        m_addFlag=false;
-        for (int i=0;i<COLUMNS;i++) {
-            m_preIndex=i;
-            m_nextIndex=m_preIndex+4;
-            while(m_nextIndex<=i+12){
-                if(m_number[m_preIndex]==0){
-                    m_preIndex=m_nextIndex;
-                    m_nextIndex=m_preIndex+4;
-                    continue;
-                }
-                if(m_number[m_nextIndex]==0)
-                {
-                    m_nextIndex+=4;
-                    continue;
-                }
-                if(m_number[m_preIndex]!=m_number[m_nextIndex])
-                {
-                    m_preIndex=m_nextIndex;
-                    m_nextIndex=m_preIndex+4;
-                }else {
-                    m_number[m_preIndex]=0;
-                    m_number[m_nextIndex]+=m_number[m_nextIndex];
-                    m_score+=m_number[m_nextIndex];
-                    m_preIndex=m_nextIndex+4;
-                    m_nextIndex=m_preIndex+4;
-                    m_addFlag=true;
-                }
-            }
-        }
-
-    }
-    if(direcation==Move_Up)
     {
         m_addFlag=false;
         for (int i=0;i<COLUMNS;i++) {
@@ -263,9 +247,9 @@ void MY2048::added(Move_Direcation direcation)
                     m_preIndex=m_nextIndex;
                     m_nextIndex=m_preIndex-4;
                 }else {
-                    m_number[m_preIndex]=0;
-                    m_number[m_nextIndex]+=m_number[m_nextIndex];
-                    m_score+=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_number[m_preIndex]+=m_number[m_preIndex];
+                    m_score+=m_number[m_preIndex];
                     m_preIndex=m_nextIndex-4;
                     m_nextIndex=m_preIndex-4;
                     m_addFlag=true;
@@ -274,39 +258,40 @@ void MY2048::added(Move_Direcation direcation)
         }
 
     }
-    if(direcation==Move_Right)
+    if(direcation==Move_Up)
     {
         m_addFlag=false;
-        for (int i=0;i<ROWS;i++) {
-            m_preIndex=i*4;
-            m_nextIndex=m_preIndex+1;
-            while(m_nextIndex<=i*4+3){
+        for (int i=0;i<COLUMNS;i++) {
+            m_preIndex=i;
+            m_nextIndex=m_preIndex+4;
+            while(m_nextIndex<=i+12){
                 if(m_number[m_preIndex]==0){
                     m_preIndex=m_nextIndex;
-                    m_nextIndex=m_preIndex+1;
+                    m_nextIndex=m_preIndex+4;
                     continue;
                 }
                 if(m_number[m_nextIndex]==0)
                 {
-                    m_nextIndex+=1;
+                    m_nextIndex+=4;
                     continue;
                 }
                 if(m_number[m_preIndex]!=m_number[m_nextIndex])
                 {
                     m_preIndex=m_nextIndex;
-                    m_nextIndex=m_preIndex+1;
+                    m_nextIndex=m_preIndex+4;
                 }else {
-                    m_number[m_preIndex]=0;
-                    m_number[m_nextIndex]+=m_number[m_nextIndex];
-                    m_score+=m_number[m_nextIndex];
-                    m_preIndex=m_nextIndex+1;
-                    m_nextIndex=m_preIndex+1;
+                    m_number[m_nextIndex]=0;
+                    m_number[m_preIndex]+=m_number[m_preIndex];
+                    m_score+=m_number[m_preIndex];
+                    m_preIndex=m_nextIndex+4;
+                    m_nextIndex=m_preIndex+4;
                     m_addFlag=true;
                 }
             }
         }
+
     }
-    if(direcation==Move_Left)
+    if(direcation==Move_Right)
     {
         m_addFlag=false;
         for (int i=0;i<ROWS;i++) {
@@ -328,9 +313,9 @@ void MY2048::added(Move_Direcation direcation)
                     m_preIndex=m_nextIndex;
                     m_nextIndex=m_preIndex-1;
                 }else {
-                    m_number[m_preIndex]=0;
-                    m_number[m_nextIndex]+=m_number[m_nextIndex];
-                    m_score+=m_number[m_nextIndex];
+                    m_number[m_nextIndex]=0;
+                    m_number[m_preIndex]+=m_number[m_preIndex];
+                    m_score+=m_number[m_preIndex];
                     m_preIndex=m_nextIndex-1;
                     m_nextIndex=m_preIndex-1;
                     m_addFlag=true;
@@ -338,9 +323,42 @@ void MY2048::added(Move_Direcation direcation)
             }
         }
     }
+    if(direcation==Move_Left)
+    {
+        m_addFlag=false;
+        for (int i=0;i<ROWS;i++) {
+            m_preIndex=i*4;
+            m_nextIndex=m_preIndex+1;
+            while(m_nextIndex<=i*4+3){
+                if(m_number[m_preIndex]==0){
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+1;
+                    continue;
+                }
+                if(m_number[m_nextIndex]==0)
+                {
+                    m_nextIndex+=1;
+
+                    continue;
+                }
+                if(m_number[m_preIndex]!=m_number[m_nextIndex])
+                {
+                    m_preIndex=m_nextIndex;
+                    m_nextIndex=m_preIndex+1;
+                }else {
+                    m_number[m_nextIndex]=0;
+                    m_number[m_preIndex]+=m_number[m_preIndex];
+                    m_score+=m_number[m_preIndex];
+                    m_preIndex=m_nextIndex+1;
+                    m_nextIndex=m_preIndex+1;
+                    m_addFlag=true;
+                }
+            }
+        }
+    }
 
 }
-void MY2048::moved(Move_Direcation direcation)
+void MY2048::moved(Move_Direcation direcation)//控制方向的移动
 {
     if(direcation==Move_Down)
     {
@@ -448,7 +466,7 @@ void MY2048::moved(Move_Direcation direcation)
     }
 
 }
-void MY2048::freshed(bool freshed)
+void MY2048::freshed(bool freshed)//刷新操作
 {
     if(freshed){
         m_step+=1;
@@ -456,18 +474,21 @@ void MY2048::freshed(bool freshed)
 //        for (int i=0;i<16;i++) {
 //            std::cout<<i <<m_number[i]<<std::endl;
 //        }
-        m_index.clear();
+        m_index.clear();//计数数组清零
+
+
 //        int nsize=m_number.size();
         for (int i=0;i<16;i++) {
             if(m_number[i]==0){
                 m_index.push_back(i);
-            }
+            }//用数组m_index保存数字为空的数字下标
         }
         int randIndex=rand()%m_index.size();
-        m_number[m_index[randIndex]]=2;
+        m_number[m_index[randIndex]]=2;//将空数字块随机赋值为2
 //        std::cout<<m_index[randIndex]<<std::endl;
 //        std::cout<<m_number[m_index[randIndex]]<<std::endl;
-        m_state.push_back(m_number);
+        m_state.push_back(m_number);//从新保存数字块数组
+
 
     }
 

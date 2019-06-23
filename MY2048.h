@@ -1,3 +1,12 @@
+/*
+作者：周伟培
+学号：2017051604116
+内容：开发的一款休闲小游戏2048
+该游戏通过键盘方向键来控制方向，以合成数字2048为目标
+*/
+
+
+
 #ifndef MY2048_H
 #define MY2048_H
 #include <QObject>
@@ -23,7 +32,6 @@ public:
         Move_Down,
         Move_Left,
         Move_Right,
-        Move_Invalid
     };
     Q_INVOKABLE void start();
     Q_INVOKABLE void move(Move_Direcation direcation);
@@ -31,6 +39,7 @@ public:
     Q_INVOKABLE QColor numColor(const int &index);
     Q_INVOKABLE bool save();
     Q_INVOKABLE bool load();
+    Q_INVOKABLE void exit();
 
      int score() const;
 
@@ -65,13 +74,15 @@ private:
     int m_bestScore;
     int m_step;
     int m_totalStep;
-    int m_lastScore;
+   // int m_lastScore;
     typedef std::vector<int>Panel;
     typedef std::vector<Panel>State;
+    typedef std::vector<int> ScoreState;
 
     Panel m_number;
     Panel m_index;
     State m_state;
+    ScoreState m_scoreState;
     int m_preIndex;
     int m_nextIndex;
 

@@ -1,3 +1,4 @@
+//顶部信息框
 import QtQuick 2.0
 
 Rectangle {

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
 
     QApplication app(argc, argv);
-    qmlRegisterType<MY2048>("MY2048",1,0,"MY2048");
+    qmlRegisterType<MY2048>("MY2048",1,0,"MY2048");//注册QML类型
     FelgoApplication felgo;
 
     // QQmlApplicationEngine is the preferred way to start qml projects since Qt 5.2

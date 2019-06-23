@@ -1,10 +1,9 @@
+
 import Felgo 3.0
 import QtQuick 2.0
-import QtQuick.Dialogs 1.2 as QQD
 import MY2048 1.0
 GameWindow {
     id: gameWindow
-    activeScene: root
     screenWidth: 360
     screenHeight: 560
     Scene {
@@ -16,7 +15,7 @@ GameWindow {
                 panel.eNums.itemAt(eI).color="white";
                 panel.eNums.itemAt(eI).eNumColor="black";
             }
-        }
+        }//清理方块
         function eShow(){
             eClear();
 
@@ -24,9 +23,9 @@ GameWindow {
                  for(eI=0;eI<16;eI++)
                  {
                     if(numProvider.show(eI)!==0){
-                        panel.eNums.itemAt(eI).eNum=numProvider.show(eI);
-                        panel.eNums.itemAt(eI).color=numProvider.color(eI);
-                        panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
+                        panel.eNums.itemAt(eI).eNum=numProvider.show(eI);//数字
+                        panel.eNums.itemAt(eI).color=numProvider.color(eI);//方块颜色
+                        panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);//数字颜色
                     }
                   }
 
@@ -37,7 +36,7 @@ GameWindow {
             information.eTotalStep=numProvider.totalStep;
             if(numProvider.step>0)
                 tip.eEnBack=true;
-
+{
 //            if(numProvider.load()===true){
 
 //                 for(eI=0;eI<16;eI++)
@@ -57,6 +56,7 @@ GameWindow {
 //            if(numProvider.step>0)
 //                tip.eEnBack=true;
 //        }
+}
 }
         Keys.onPressed: {
             switch(event.key){
@@ -80,7 +80,8 @@ GameWindow {
                 break;
             }
 
-        }
+        }//键盘响应
+
         width: 360
         height: 560
 
@@ -107,13 +108,15 @@ GameWindow {
                     root.focus=true;
                     tip.eEnBack=false;
                 }
+                property int  i:3
                 onBack: {
+                    i--
                     numProvider.backed();
                     root.eShow();
-                    if(!numProvider.step)
+                    if(!numProvider.step||i===0)
                         tip.eEnBack=false;
                 }
-                onExit: {
+                onSave: {
                      numProvider.save();
                 }
                 onLoad: {
@@ -123,8 +126,35 @@ GameWindow {
              }
         }
     }
+//   DirButton{
 
+//    id:dirButton
+//    onRight: {
+//        numProvider.move(MY2048.Move_Right)
+//            root.eShow()
+//    }
+//    onLeft: {
+//        numProvider.move(MY2048.Move_Left)
+//            root.eShow()
+//    }
+//    onDown: {
+//        numProvider.move(MY2048.Move_Down)
+//            root.eShow()
 
+//    }
+//    onUp: {
+//        numProvider.move(MY2048.Move_Up)
+//        root.eShow()
+//    }
+//   }
+//    ExitButton{
+//        x:gameWindow.width*4/5
+//        y:gameWindow.height/2
+//        onExit: {
+//            numProvider.exit()
+//        }
+
+//    }
 
 
 }
