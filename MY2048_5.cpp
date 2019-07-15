@@ -1,4 +1,4 @@
-#include "MY2048.h"
+#include "MY2048_5.h"
 #include <ctime>
 #include <QDebug>
 #include <QFile>
@@ -9,22 +9,25 @@
 #include <QTimer>
 #include <vector>
 #include <algorithm>
-MY2048::MY2048(QObject *parent)
+MY2048_5::MY2048_5(QObject *parent)
     :QObject(parent)
 {
 
     connect(this,SIGNAL(backed()),this,SLOT(goBack()));
 
 }
-MY2048::~MY2048()
+
+MY2048_5::~MY2048_5()
 {
 
 }
-void MY2048::start()
+
+void MY2048_5::start()
 {
     initMum();
 }
-QColor MY2048::color(const int &index)//通过number来判断方块颜色
+
+QColor MY2048_5::color(const int &index)//通过number来判断方块颜色
 {
     int num=m_number[index];
     QColor color;
@@ -47,7 +50,8 @@ QColor MY2048::color(const int &index)//通过number来判断方块颜色
     }
     return color;
 }
-QColor MY2048::numColor(const int &index)//数字颜色
+
+QColor MY2048_5::numColor(const int &index)//数字颜色
 {
     if(m_number[index]>8192)
         return QColor(0,0,0);
@@ -55,11 +59,13 @@ QColor MY2048::numColor(const int &index)//数字颜色
         return  QColor(100,20,255);
     }
 }
-int MY2048::show(const int &index)//返回数字
+
+int MY2048_5::show(const int &index)//返回数字
 {
     return m_number[index];
 }
-void MY2048::move(Move_Direcation direcation)//控制方块的移动合并和刷新
+
+void MY2048_5::move(Move_Direcation direcation)//控制方块的移动合并和刷新
 {
     //if(!m_step){}
 
@@ -82,7 +88,8 @@ void MY2048::move(Move_Direcation direcation)//控制方块的移动合并和刷
         m_bestScore=m_score;
 
 }
-void MY2048::goBack()//撤销功能
+
+void MY2048_5::goBack()//撤销功能
 {
     if(m_step>0){
         m_number=m_state[m_step-1];
@@ -94,19 +101,21 @@ void MY2048::goBack()//撤销功能
 
     }
 }
-void MY2048::reordering()
+
+void MY2048_5::reordering()
 {
     //srand((unsigned long)time(NULL));
    random_shuffle(m_number.begin(),m_number.end());
 }
-void MY2048::initMum()//初始化游戏
+
+void MY2048_5::initMum()//初始化游戏
 {
     m_number.clear();
-    m_number=Panel(16,0);
-    int firstNum=rand()%16;
-    int secondNum=rand()%16;
+    m_number=Panel(25,0);
+    int firstNum=rand()%25;
+    int secondNum=rand()%25;
     while (secondNum==firstNum) {
-        secondNum=rand()%16;
+        secondNum=rand()%25;
     }
     m_number[firstNum]=2;
     m_number[secondNum]=2;
@@ -122,29 +131,34 @@ void MY2048::initMum()//初始化游戏
 
 }
 
-void MY2048::Mydialog()//提示游戏结束
+void MY2048_5::Mydialog()//提示游戏结束
 {
     QMessageBox msgBox;
     msgBox.setText("Please Click The New Game");
     msgBox.exec();
 }
-int MY2048::score() const
+
+int MY2048_5::score() const
 {
     return m_score;
 }
-int MY2048::bestScore() const
+
+int MY2048_5::bestScore() const
 {
     return m_bestScore;
 }
-int MY2048::step() const
+
+int MY2048_5::step() const
 {
     return m_step;
 }
-int MY2048::totalStep() const
+
+int MY2048_5::totalStep() const
 {
     return m_totalStep;
 }
-void MY2048::write(QJsonObject &json)//往JSON文档里写数据
+
+void MY2048_5::write(QJsonObject &json)//往JSON文档里写数据
 {
     json["score"] =m_score;
     json["bestScore"]=m_bestScore;
@@ -161,7 +175,8 @@ void MY2048::write(QJsonObject &json)//往JSON文档里写数据
  //   std::cout<<m_index.size();
 
 }
-bool MY2048::save()//保存游戏
+
+bool MY2048_5::save()//保存游戏
 {
 
     QFile saveFile(QStringLiteral("save.json"));
@@ -176,17 +191,19 @@ bool MY2048::save()//保存游戏
     saveFile.write(saveDoc.toJson());
     return true;
 }
-bool MY2048::nextGame()//判断游戏是否结束
+
+bool MY2048_5::nextGame()//判断游戏是否结束
 {
 
-    for (int i=0;i<16;i++) {
+    for (int i=0;i<25;i++) {
         if(m_number[i]==0)
             return false;
     }
     return true;
 
 }
-void MY2048::read(QJsonObject &json)//将json文档里的数据读出来
+
+void MY2048_5::read(QJsonObject &json)//将json文档里的数据读出来
 {
 
     if(json.contains("score") && json["score"].isDouble())
@@ -208,7 +225,7 @@ void MY2048::read(QJsonObject &json)//将json文档里的数据读出来
     }
 }
 
-bool MY2048::load()//读取本地保存的游戏数据
+bool MY2048_5::load()//读取本地保存的游戏数据
 {
 
      // if(load())
@@ -229,12 +246,13 @@ bool MY2048::load()//读取本地保存的游戏数据
     return true;
 }
 
-void MY2048::exit()//终止游戏
+void MY2048_5::exit()//终止游戏
 {
     QApplication* app;
     app->exit(0);
 }
-void MY2048::added(Move_Direcation direcation)//控制方块的相加
+
+void MY2048_5::added(Move_Direcation direcation)//控制方块的相加
 {
     if(direcation==Move_Down)
     {
@@ -377,7 +395,7 @@ void MY2048::added(Move_Direcation direcation)//控制方块的相加
     }
 
 }
-void MY2048::moved(Move_Direcation direcation)//控制方向的移动
+void MY2048_5::moved(Move_Direcation direcation)//控制方向的移动
 {
     if(direcation==Move_Down)
     {
@@ -485,7 +503,7 @@ void MY2048::moved(Move_Direcation direcation)//控制方向的移动
     }
 
 }
-void MY2048::freshed(bool freshed)//刷新操作
+void MY2048_5::freshed(bool freshed)//刷新操作
 {
     if(freshed){
         m_step+=1;
@@ -497,7 +515,7 @@ void MY2048::freshed(bool freshed)//刷新操作
 
 
 //        int nsize=m_number.size();
-        for (int i=0;i<16;i++) {
+        for (int i=0;i<25;i++) {
             if(m_number[i]==0){
                 m_index.push_back(i);
             }//用数组m_index保存数字为空的数字下标

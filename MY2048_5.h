@@ -1,22 +1,13 @@
- /*
-作者：周伟培
-学号：2017051604116
-内容：开发的一款休闲小游戏2048
-该游戏通过键盘方向键来控制方向，以合成数字2048为目标
-*/
-
-
-
-#ifndef MY2048_H
-#define MY2048_H
+#ifndef MY2048_5_H
+#define MY2048_5_H
 #include <QObject>
 #include <QColor>
 #include <QJsonObject>
 #include <QString>
 #include <QMessageBox>
-#define ROWS 4
-#define COLUMNS 4
-class MY2048 :public QObject
+#define ROWS 5
+#define COLUMNS 5
+class MY2048_5 :public QObject
 {
     Q_OBJECT
     Q_ENUMS(Move_Direcation)
@@ -25,8 +16,8 @@ class MY2048 :public QObject
     Q_PROPERTY(int step READ step )
     Q_PROPERTY(int totalStep READ totalStep )
 public:
-    MY2048(QObject *parent = nullptr);
-    ~MY2048();
+    MY2048_5(QObject *parent = nullptr);
+    ~MY2048_5();
     enum Move_Direcation{
         Move_Up=0,
         Move_Down,
@@ -94,5 +85,4 @@ private:
     bool m_add_Down;
     bool m_moveFlag;
 };
-
-#endif // MY2048_H
+#endif // MY2048_5_H

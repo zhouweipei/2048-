@@ -4,6 +4,7 @@ import QtQuick 2.0
 import MY2048 1.0
 GameWindow {
     id: gameWindow
+    activeScene: root
     screenWidth: 360
     screenHeight: 560
     Scene {
@@ -36,27 +37,7 @@ GameWindow {
             information.eTotalStep=numProvider.totalStep;
             if(numProvider.step>0)
                 tip.eEnBack=true;
-{
-//            if(numProvider.load()===true){
 
-//                 for(eI=0;eI<16;eI++)
-//                 {
-//                    if(numProvider.show(eI)!==0){
-//                        panel.eNums.itemAt(eI).eNum=numProvider.show(eI);
-//                        panel.eNums.itemAt(eI).color=numProvider.color(eI);
-//                        panel.eNums.itemAt(eI).eNumColor=numProvider.numColor(eI);
-//                    }
-//                  }
-
-
-//            information.eScore=numProvider.score;
-//            information.eStep=numProvider.step;
-//            information.eBestScore=numProvider.bestScore;
-//            information.eTotalStep=numProvider.totalStep;
-//            if(numProvider.step>0)
-//                tip.eEnBack=true;
-//        }
-}
 }
         Keys.onPressed: {
             switch(event.key){
@@ -97,8 +78,57 @@ GameWindow {
              Panel{
             id:panel
             anchors.centerIn: parent
-
+            Timer {
+              id: moveRelease
+              interval: 300
             }
+            MouseArea{
+                id:mouseArea
+                anchors.fill:panel
+                property int startX
+                property int startY
+                property bool moving:false
+                onPressed: {
+                    startX=mouse.x
+                    startY=mouse.y
+                    moving=false
+                }
+                onReleased: {
+                    moving=false
+                }
+                onPositionChanged: {
+                    var deltax=mouse.x-startX
+                    var deltay=mouse.y-startY
+                    if(moving==false){
+                        if(Math.abs(deltax)>40||Math.abs(deltay)>40){
+                            moving=true
+                            if (deltax > 30 && Math.abs(deltay) < 30 && moveRelease.running === false) {
+                                numProvider.move(MY2048.Move_Right);
+                                root.eShow();
+                                moveRelease.start()
+
+                            }
+                            else if (deltax < -30 && Math.abs(deltay) < 30 && moveRelease.running === false) {
+                              numProvider.move(MY2048.Move_Left)
+                              root.eShow()
+                              moveRelease.start()
+                            }
+                            else if (Math.abs(deltax) < 30 && deltay > 30 && moveRelease.running === false){
+                                numProvider.move(MY2048.Move_Down)
+                                root.eShow()
+                                moveRelease.start()
+                            }
+                            else if (Math.abs(deltax) < 30 && deltay < 30 && moveRelease.running === false) {
+                                numProvider.move(MY2048.Move_Up)
+                                root.eShow()
+                                moveRelease.start()
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+
              Tip{
                  y:460
                 id:tip
@@ -123,38 +153,13 @@ GameWindow {
                     numProvider.load();
                     root.eShow();
                 }
+                onReordering: {
+                    numProvider.reordering();
+                    root.eShow();
+                   // tip.eEnReordering=false
+
+                }
              }
         }
     }
-//   DirButton{
-
-//    id:dirButton
-//    onRight: {
-//        numProvider.move(MY2048.Move_Right)
-//            root.eShow()
-//    }
-//    onLeft: {
-//        numProvider.move(MY2048.Move_Left)
-//            root.eShow()
-//    }
-//    onDown: {
-//        numProvider.move(MY2048.Move_Down)
-//            root.eShow()
-
-//    }
-//    onUp: {
-//        numProvider.move(MY2048.Move_Up)
-//        root.eShow()
-//    }
-//   }
-//    ExitButton{
-//        x:gameWindow.width*4/5
-//        y:gameWindow.height/2
-//        onExit: {
-//            numProvider.exit()
-//        }
-
-//    }
-
-
 }
